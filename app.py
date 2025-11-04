@@ -9,6 +9,7 @@ from langchain.tools import StructuredTool
 from langchain.agents import create_tool_calling_agent, AgentExecutor
 from langchain_core.prompts import ChatPromptTemplate
 
+
 # ✅ 반드시 첫 줄 근처에 배치해야 함!!
 st.set_page_config(page_title="AI 물성 계산기", page_icon="🧪")
 
@@ -100,7 +101,7 @@ agent_executor = get_agent_executor()
 # -------------------------------------------------------
 # 5️⃣ Streamlit UI
 # -------------------------------------------------------
-st.title("🧪 AI 물성 계산 에이전트 (Stable v4)")
+st.title("🧪 AI 물성 계산 에이전트")
 
 if "response" not in st.session_state:
     st.session_state.response = None
@@ -108,7 +109,7 @@ if "response" not in st.session_state:
 if "error" not in st.session_state:
     st.session_state.error = None
 
-user_input = st.text_input("AI에게 요청하세요:", placeholder="예: CCO 물성 계산해줘")
+user_input = st.text_input("AI에게 요청하세요:", placeholder="예: 실험을 위한 분자 CCO 물성을 계산해줘")
 
 if st.button("물성 계산 요청하기"):
     if user_input:
