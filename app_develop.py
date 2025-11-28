@@ -9,17 +9,11 @@ from langchain.agents import create_tool_calling_agent, AgentExecutor
 from langchain_core.prompts import ChatPromptTemplate
 import json
 
-# ✅ Streamlit 설정 (항상 최상단)
-st.set_page_config(page_title="AI 물성 계산기", page_icon="🧪")
+st.set_page_config(page_title="AI 물성 계산기")
 
-# -------------------------------------------------------
-# 1️⃣ 환경 변수 설정
-# -------------------------------------------------------
 os.environ["GROQ_API_KEY"] = os.getenv("GROQ_API_KEY")
 
-# -------------------------------------------------------
-# 2️⃣ RDKit 계산 함수
-# -------------------------------------------------------
+
 def _calculate_aromatic_proportion(mol: Chem.Mol) -> float:
     """분자의 방향족 비율 계산"""
     num_aromatic_atoms = sum(atom.GetIsAromatic() for atom in mol.GetAtoms())
@@ -27,7 +21,6 @@ def _calculate_aromatic_proportion(mol: Chem.Mol) -> float:
 
 
 def _count_acidic_basic_groups(mol: Chem.Mol):
-    """산성 / 염기성 작용기 수를 간단한 SMARTS로 추정"""
     acidic_smarts = ["C(=O)O", "S(=O)(=O)O", "P(=O)(O)O"]  # 카복실, 설폰산, 포스폰산 등
     basic_smarts = ["[NX3;H2,H1;!$(NC=O)]", "N=C", "NCC"]  # 아민류
 
@@ -38,7 +31,6 @@ def _count_acidic_basic_groups(mol: Chem.Mol):
 
 
 def _get_molecular_properties(smiles: str) -> dict:
-    """RDKit 기반 물성 계산"""
     mol = Chem.MolFromSmiles(smiles)
     if mol is None:
         return {"error": "Invalid SMILES string"}
@@ -66,9 +58,6 @@ def _get_molecular_properties(smiles: str) -> dict:
         "status": "success",
     }
 
-# -------------------------------------------------------
-# 3️⃣ Tool 정의
-# -------------------------------------------------------
 class MolPropsInput(BaseModel):
     smiles: str = Field(..., description="A SMILES string representing a molecule.")
 
@@ -80,9 +69,6 @@ get_molecular_properties = StructuredTool.from_function(
 )
 tools = [get_molecular_properties]
 
-# -------------------------------------------------------
-# 4️⃣ LLM + Agent 설정
-# -------------------------------------------------------
 @st.cache_resource
 def load_llm():
     return ChatGroq(model_name="meta-llama/llama-4-scout-17b-16e-instruct", temperature=0)
@@ -109,9 +95,7 @@ def get_agent_executor():
 
 agent_executor = get_agent_executor()
 
-# -------------------------------------------------------
-# 5️⃣ Streamlit UI
-# -------------------------------------------------------
+
 st.title("🧪 AI 물성 계산 에이전트 (Stable v6)")
 
 user_input = st.text_input(
@@ -138,14 +122,11 @@ if st.button("물성 계산 요청하기"):
     else:
         st.warning("문장을 입력해주세요!")
 
-# -------------------------------------------------------
-# 6️⃣ 결과 출력
-# -------------------------------------------------------
 if st.session_state.error:
-    st.error(f"❌ 오류 발생: {st.session_state.error}")
+    st.error(f"오류 발생: {st.session_state.error}")
 
 elif st.session_state.response:
-    st.subheader("🧾 AI 응답 결과:")
+    st.subheader("AI 응답 결과:")
 
     try:
         parsed = json.loads(st.session_state.response)
