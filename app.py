@@ -10,17 +10,10 @@ from langchain.agents import create_tool_calling_agent, AgentExecutor
 from langchain_core.prompts import ChatPromptTemplate
 
 
-# ✅ 반드시 첫 줄 근처에 배치해야 함!!
-st.set_page_config(page_title="AI 물성 계산기", page_icon="🧪")
+st.set_page_config(page_title="AI 물성 계산기")
 
-# -------------------------------------------------------
-# 1️⃣ 환경 변수 설정
-# -------------------------------------------------------
 os.environ["GROQ_API_KEY"] = os.getenv("GROQ_API_KEY")
 
-# -------------------------------------------------------
-# 2️⃣ RDKit 계산 함수
-# -------------------------------------------------------
 def _calculate_aromatic_proportion(mol: Chem.Mol) -> float:
     num_aromatic_atoms = sum(atom.GetIsAromatic() for atom in mol.GetAtoms())
     return num_aromatic_atoms / mol.GetNumAtoms() if mol.GetNumAtoms() else 0.0
@@ -40,8 +33,6 @@ def _get_molecular_properties(smiles: str) -> dict:
     h_donors = Descriptors.NumHDonors(mol)
     h_acceptors = Descriptors.NumHAcceptors(mol)
 
-    # --- [!!!] 추가 끝 ---
-
     return {
         "SMILES": smiles,
         "LogP": round(logp, 2),
@@ -53,9 +44,6 @@ def _get_molecular_properties(smiles: str) -> dict:
         "status": "success",
     }
 
-# -------------------------------------------------------
-# 3️⃣ Tool 정의
-# -------------------------------------------------------
 class MolPropsInput(BaseModel):
     smiles: str = Field(..., description="A SMILES string representing a molecule.")
 
@@ -69,9 +57,6 @@ get_molecular_properties = StructuredTool.from_function(
 
 tools = [get_molecular_properties]
 
-# -------------------------------------------------------
-# 4️⃣ LLM + Agent 설정
-# -------------------------------------------------------
 @st.cache_resource
 def load_llm():
     return ChatGroq(model_name="meta-llama/llama-4-scout-17b-16e-instruct", temperature=0)
@@ -98,9 +83,7 @@ def get_agent_executor():
 
 agent_executor = get_agent_executor()
 
-# -------------------------------------------------------
-# 5️⃣ Streamlit UI
-# -------------------------------------------------------
+
 st.title("🧪 AI 물성 계산 에이전트")
 
 if "response" not in st.session_state:
